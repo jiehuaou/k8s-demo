@@ -19,7 +19,10 @@ chmod 700 get_helm.sh
 
 
 # Download the latest Minikube
+
+```bash
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+```
 
 # Make it executable
 chmod +x ./minikube
@@ -32,6 +35,8 @@ minikube config set driver docker
 
 # check k8s version
 https://cdn.dl.k8s.io/release/stable.txt
+
+currently it is v1.28.2
 
 # Download the latest Kubectl
 curl -LO "https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl"
@@ -52,8 +57,11 @@ kubectl config use-context minikube
 
 
 # Start minikube again to enable kubectl in it
+
+```bash
 minikube start
 kubectl get pods -A
+```
 
 # enable the NGINX Ingress controller, run the following command:
 minikube addons enable ingress
@@ -63,45 +71,70 @@ minikube addons enable ingress
 # Verify that the NGINX Ingress controller is running
 kubectl get pods -n ingress-nginx
 
-```shell
+```txt
 ingress-nginx-admission-create-v4m59        0/1     Completed   0             
 ingress-nginx-admission-patch-ngkgt         0/1     Completed   2               
 ingress-nginx-controller-5dcd45b5bf-8p8d7   1/1     Running     3 
 ```
 
 # create sample deploy
+
+```bash
 kubectl create deployment nginx-deployment --image=nginx
 
 kubectl create deployment go-web --image=gcr.io/google-samples/hello-app:1.0
+```
 
 # Expose ngnix App as service
+
+```bash
 kubectl expose deployment nginx-deployment --port=80 --target-port=80 --type=ClusterIP --name=nginx-service
 
 kubectl expose deployment go-web       --port=8080 --target-port=8080 --type=ClusterIP --name=go-web-svc
+```
 
 # Visit the Service via NodePort:
+
+```bash
 minikube service nginx-service --url
 
 minikube service go-web-svc --url
+```
 
 # map in ingress
+
 kubectl apply -f my-ingress.yaml
+
+
+# config /etc/hosts
+
+```
+192.168.49.2 hello-world.info
+192.168.49.2 hello.local.info
+
+```
 
 # invoke ingress
 
-curl --resolve "hello.local:192.168.49.2" -i http://hello.local/app
+```bash
+curl --resolve "hello.local:80:$(minikube ip)" -i http://hello.local/app
 
 curl -v http://hello-world.info/web
 
 curl -v http://hello.local.info/app
+```
 
 
 # port-forward service for temporary access
+
+```bash
 kubectl port-forward svc/nginx-service 80:80
 
 sudo kubectl port-forward pod/nginx-deployment-66fb7f764c-v89rw 80:80
+```
 
 # proxy service for temporary access
+
 kubectl proxy 
 
 
