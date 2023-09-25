@@ -23,18 +23,23 @@ chmod 700 get_helm.sh
 
 # Download the latest Minikube
 
-```bash
+```sh
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 ```
 
-# Make it executable
-chmod +x ./minikube
+# Make it executable, Move it to your user's executable PATH
 
-# Move it to your user's executable PATH
+```sh
+chmod +x ./minikube
+# 
 sudo mv ./minikube /usr/local/bin/
+```
 
 # Set the driver version to Docker
+
+```sh
 minikube config set driver docker
+```
 
 # check k8s version
 https://cdn.dl.k8s.io/release/stable.txt
@@ -42,22 +47,30 @@ https://cdn.dl.k8s.io/release/stable.txt
 currently it is v1.28.2
 
 # Download the latest Kubectl
+
+```sh
 curl -LO "https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl"
+```
 
+# Make it executable, Move it to your user's executable PATH
 
-# Make it executable
+```sh
 chmod +x ./kubectl
 
-# Move it to your user's executable PATH
 sudo mv ./kubectl /usr/local/bin/
-
+```
 
 # Running Minikube to create a local Kubernetes cluster
+
+```sh
 minikube start --kubernetes-version v1.28.2
+```
 
 # Once your minikube starts working, type:
-kubectl config use-context minikube
 
+```sh
+kubectl config use-context minikube
+```
 
 # Start minikube again to enable kubectl in it
 
@@ -67,14 +80,19 @@ kubectl get pods -A
 ```
 
 # enable the NGINX Ingress controller, run the following command:
+
+```sh
 minikube addons enable ingress
+```
 
 > Note: It can take up to a minute before you see these pods running OK.
 
 # Verify that the NGINX Ingress controller is running
+
+```sh
 kubectl get pods -n ingress-nginx
 
-```txt
+# output
 ingress-nginx-admission-create-v4m59        0/1     Completed   0             
 ingress-nginx-admission-patch-ngkgt         0/1     Completed   2               
 ingress-nginx-controller-5dcd45b5bf-8p8d7   1/1     Running     3 
@@ -106,8 +124,9 @@ minikube service go-web-svc --url
 
 # map in ingress
 
+```sh
 kubectl apply -f my-ingress.yaml
-
+```
 
 # config /etc/hosts
 
@@ -136,8 +155,10 @@ kubectl port-forward svc/nginx-service 80:80
 sudo kubectl port-forward pod/nginx-deployment-66fb7f764c-v89rw 80:80
 ```
 
-# proxy service for temporary access
+# show up dashboard
 
-kubectl proxy 
+```sh
+minikube dashboard
+```
 
 
