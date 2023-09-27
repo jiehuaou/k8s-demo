@@ -139,7 +139,8 @@ kubectl apply -f my-ingress.yaml
 # invoke ingress
 
 ```bash
-curl --resolve "hello.local:80:$(minikube ip)" -i http://hello.local/app
+curl --resolve "hello-world.info:80:$(minikube ip)" -i http://hello-world.info/web
+
 
 curl -v http://hello-world.info/web
 
