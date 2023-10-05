@@ -6,10 +6,10 @@ add export in .bashrc
 without proxy properly configured, curl will get messed up.
 
 ```bash
-export http_proxy=http://host.docker.internal:7890
-export https_proxy=http://host.docker.internal:7890
+# export http_proxy=http://host.docker.internal:7890
+# export https_proxy=http://host.docker.internal:7890
 
-export no_proxy="`echo {1..99},` .info"
+# export no_proxy="`echo {1..99},` .info"
 
 ```
 
@@ -104,7 +104,7 @@ ingress-nginx-controller-5dcd45b5bf-8p8d7   1/1     Running     3
 ```bash
 kubectl create deployment nginx-deployment --image=nginx
 
-kubectl create deployment go-web --image=gcr.io/google-samples/hello-app:1.0
+kubectl create deployment go-web --image=phozzy/hello-app
 ```
 
 # Expose ngnix App as service
