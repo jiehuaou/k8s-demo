@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-js
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-js
+  template:
+    metadata:
+      labels:
+        app: hello-js
+    spec:
+      containers:
+        - name: hello-js-container
+          image: docker.io/albertou/hello-js:1.0
+          #imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "1.5"
+          
