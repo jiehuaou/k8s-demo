@@ -1,20 +1,19 @@
 # build
 
-docker build -t hello-js:1.0  .
-docker build -t hello-js:2.0  .
 
-docker tag hello-js:1.0 albertou/hello-js:1.0
-docker tag hello-js:2.0 albertou/hello-js:2.0
+docker build -t hello-js:3.3  .
 
-docker push  albertou/hello-js:1.0
-docker push  albertou/hello-js:2.0
+docker tag hello-js:3.3 albertou/hello-js:3.3
+
+docker push  albertou/hello-js:3.3
 
 # deploy
 
 kubectl apply -f k8s/deploy.yaml
 
-kubectl create deploy hello-js --image=albertou/hello-js:1.0 --port=3000 
-kubectl create deploy hello-js --image=albertou/hello-js:2.0 --port=3000 
+kubectl delete deploy hello-js
+
+kubectl create deploy hello-js --image=albertou/hello-js:3.3 --port=3000 
 
 # service
 

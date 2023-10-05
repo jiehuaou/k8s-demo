@@ -5,15 +5,15 @@ metadata:
   name: hello-js-vs
 spec:
   hosts:
-  - hello.info
+  - "*"
   gateways:
   - hello-gateway
   http:
   - match:
     - uri:
-        prefix: /hello-app
+        prefix:  /hello-app
     rewrite:
-      uri: /    
+      uri: /api
     route:
     - destination:
         host: hello-js-svc
@@ -23,3 +23,4 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 3s
+      retryOn: 5xx

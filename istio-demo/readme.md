@@ -10,6 +10,7 @@ virtualService:
     retries:
       attempts: 3
       perTryTimeout: 3s
+      retryOn: 5xx
 ```
 Timeout per try always 3s (including initial call), but the total timeout for all attempts is 10s.
 
@@ -24,6 +25,7 @@ virtualService:
     retries:
       attempts: 3
       perTryTimeout: 3s
+      retryOn: 5xx
 ```
 
 Timeout per try always 3s (including initial call), but the total timeout for all attempts is 8s.
@@ -32,3 +34,81 @@ Timeout per try always 3s (including initial call), but the total timeout for al
 * There are going to be a maximum of 3 attempts.
     * 3s (initial call) + 3s + 2s = 8s
 * The overall waiting time for a successful attempt will not be longer than 8 seconds.
+
+# test case 1 - HTTP/1.1 504 Timeout after 9 seconds and 3 attempts
+
+```yaml
+virtualService:
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx
+```
+
+* deploy hello-js service
+* deploy ingress gateway
+* deploy virtualService
+* open istio-ingressgateway via minikube
+
+```bash
+kubectl create deploy hello-js --image=albertou/hello-js:3.3 --port=3000 
+kubectl expose deployment hello-js --port=3000 --target-port=3000 --type=ClusterIP --name=hello-js-svc
+
+kubectl apply -f istio-gateway.yaml
+kubectl apply -f hello-virtual-service.yaml
+
+# open the url via minikube
+minikube service istio-ingressgateway -n istio-system --url
+
+# watch logs
+kubectl logs -f hello-js-pod-xxx
+
+```
+
+```bash
+# hello service (id:1) will wait 5000 ms, and istio will retry 3 times
+time curl http://127.0.0.1:46021/hello-app/hello/slow/5000/1
+
+```
+
+logs was shown, service was retryed 3 times
+```txt
+Koa.js server listening at http://localhost:3000
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:48 GMT+0000 
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:51 GMT+0000 
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:54 GMT+0000 
+
+```
+
+total time was 9.013s
+```txt
+real    0m9.013s
+user    0m0.005s
+sys     0m0.000s
+```
+
+# test case 2 - HTTP/1.1 500 after 4 attempts
+
+```bash
+# hello service (id:2) will return 500 http code immediately, 
+# and istio will retry 4 times totally
+
+time curl http://127.0.0.1:46021/hello-app/hello/error/500/2
+
+```
+
+logs was shown, service was retryed 4 times
+```txt
+Hello error 2 ... called at Thu Oct 05 2023 12:05:31 GMT+0000 
+Hello error 2 ... called at Thu Oct 05 2023 12:05:31 GMT+0000 
+Hello error 2 ... called at Thu Oct 05 2023 12:05:32 GMT+0000 
+Hello error 2 ... called at Thu Oct 05 2023 12:05:32 GMT+0000 
+```
+
+total time was 2.112s, since hello service does not wait in this path /hello/error/500/2
+```txt
+real    0m2.112s
+user    0m0.000s
+sys     0m0.004s
+```
