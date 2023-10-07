@@ -13,7 +13,7 @@ router.get("/api/hello/slow/:time/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
     console.log(`Hello slow ${id} ... called at ${timestamp} ` );
-    const time = parseInt(ctx.params.time);  // milliseconds
+    const time = parseInt(ctx.params.time) | 10;  // milliseconds
     await new Promise((resolve) => {
         setTimeout(() => {
             ctx.body = `(${id}) Hello World ${time} at ${timestamp} \n`;
@@ -27,7 +27,7 @@ router.get("/api/hello/error/:code/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
     console.log(`Hello error ${id} ... called at ${timestamp} ` );
-    const code = parseInt(ctx.params.code);  // error code 5xx, 4xx
+    const code = parseInt(ctx.params.code) | 500;  // error code 5xx, 4xx
     await new Promise((resolve) => {
         setTimeout(() => {
             ctx.status = code;
