@@ -16,7 +16,7 @@ router.get("/api/hello/slow/:time/:id", async (ctx) => {
     const time = parseInt(ctx.params.time);  // milliseconds
     await new Promise((resolve) => {
         setTimeout(() => {
-            ctx.body = `Hello World ${time} at ${timestamp} \n`;
+            ctx.body = `(${id}) Hello World ${time} at ${timestamp} \n`;
             console.log(`Hello slow ${id}  ... done`);
             resolve();
         }, time);
@@ -32,7 +32,7 @@ router.get("/api/hello/error/:code/:id", async (ctx) => {
         setTimeout(() => {
             ctx.status = code;
             
-            ctx.body = `something wrong ${code} at ${timestamp} \n`;
+            ctx.body = `(${id}) something wrong ${code} at ${timestamp} \n`;
             console.log(`Hello error ${id}  ... done`);
             resolve();
         }, 500);
