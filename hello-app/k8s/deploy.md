@@ -1,3 +1,17 @@
+# deploy fortio - use to test other services
+
+```sh
+
+kubectl create deploy fortio --image=fortio/fortio:latest
+
+# run fortio to test hello-js service
+# [-t 10s, duration second] [-qps 100, Total Queries Per Seconds]
+# [-c 10, concurrency] [-loglevel Warning, log level]
+
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -qps 100 -t 5s -c 20  http://hello-js-svc:80/api/hello
+
+```
+
 # build
 
 ``` sh
