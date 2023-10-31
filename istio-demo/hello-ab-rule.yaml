@@ -1,0 +1,38 @@
+# circuit breaker on hello-ab-svc
+# See more at https://istio.io/docs/tasks/traffic-management/circuit-breaking/
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: hello-ab-svc-rule
+spec:
+  host: hello-ab-svc
+  trafficPolicy:
+    connectionPool:
+      http: {}
+      tcp: {}
+    loadBalancer:
+      simple: RANDOM
+    outlierDetection:
+      consecutive5xxErrors: 10
+      interval: 5s
+      baseEjectionTime: 2m
+      maxEjectionPercent: 100
+
+---
+# See more at https://istio.io/docs/reference/config/networking/virtual-service/
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: hello-ab-virtual-service
+spec:
+  hosts:
+  - hello-ab-svc
+  http:
+  - route:
+    - destination:
+        host: hello-ab-svc
+    timeout: 9s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx

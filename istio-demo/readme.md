@@ -112,3 +112,37 @@ real    0m2.112s
 user    0m0.000s
 sys     0m0.004s
 ```
+
+# Istio Circuit Breaker With Outlier Detection
+
+The basic intent of outlier detection is to stop sending requests to an unhealthy instance and give it time to recover.
+
+```yaml
+trafficPolicy:
+    connectionPool:
+        http: {}
+        tcp: {}
+    loadBalancer:
+        simple: RANDOM
+    outlierDetection:
+        baseEjectionTime: 20s
+        consecutive5xxErrors: 3
+        interval: 10s
+        maxEjectionPercent: 100
+```
+
+* __BaseEjectionTime__ - The maximum ejection duration for a host. For example, the host will be ejected for 20 seconds before it is evaluated again for processing requests.
+* __consecutive5xxErrors__ - Number of errors before a host is ejected from the connection pool. For example, if you have three consecutive errors while interacting with a service, Istio will mark the pod as unhealthy.
+* __Interval__ - The time interval for ejection analysis. For example, the service dependencies are verified every 10 seconds.
+* __MaxEjectionPercent__ - The max percent of hosts that can be ejected from the load balanced pool. For example, setting this field to 100 implies that any unhealthy pods throwing consecutive errors can be ejected and the request will be rerouted to the healthy pods.
+
+```sh
+k apply -f  DestinationRule.yaml
+
+istioctl analyze 
+
+export FORTIO_POD=fortio-6cfb66fd9-fsx5n
+
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a
+
+```

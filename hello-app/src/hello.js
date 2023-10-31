@@ -1,15 +1,22 @@
 const Router = require("koa-router");
 const router = new Router();
 
+let counter = 0;
+
+const getCounter = () => {
+    return counter++;
+}
 const stringToBoolean = (stringValue) => {
     switch(stringValue?.toLowerCase()?.trim()){
         case "true": 
         case "yes": 
+        case "on":
         case "1": 
           return true;
 
         case "false": 
         case "no": 
+        case "off":
         case "0": 
           return false;
 
@@ -33,7 +40,7 @@ router.get("/api/hello", async (ctx) => {
 router.get("/api/hello/slow/:time/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
-    console.log(`Hello slow ${id} ... called at ${timestamp} ` );
+    console.log(`Hello ${getCounter()} slow ${id} ... called at ${timestamp} ` );
     const time = parseInt(ctx.params.time) | 10;  // milliseconds
     await new Promise((resolve) => {
         setTimeout(() => {
@@ -47,7 +54,7 @@ router.get("/api/hello/slow/:time/:id", async (ctx) => {
 router.get("/api/hello/error/:code/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
-    console.log(`Hello error ${id} ... called at ${timestamp} ` );
+    console.log(`Hello ${getCounter()} error ${id} ... called at ${timestamp} ` );
     const code = parseInt(ctx.params.code) | 500;  // error code 5xx, 4xx
    
     if(!enabled){

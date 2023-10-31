@@ -1,0 +1,84 @@
+# configureMap for variable ENABLE_HELLO_ERROR
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config-on
+data:
+  ENABLE_HELLO_ERROR: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config-off
+data:
+  ENABLE_HELLO_ERROR: "false"
+---
+# deploy pod with env variable ENABLE_HELLO_ERROR
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-js-on-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-js-on
+  template:
+    metadata:
+      labels:
+        app: hello-js-on
+        hello: error-on-off
+    spec:
+      containers:
+        - name: hello-js-on
+          image: albertou/hello-js:3.8
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "1.5"
+          env:
+            - name: ENABLE_HELLO_ERROR
+              value: "true"
+---           
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-js-off-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-js-off
+  template:
+    metadata:
+      labels:
+        app: hello-js-off
+        hello: error-on-off
+    spec:
+      containers:
+        - name: hello-js-off
+          image: albertou/hello-js:3.8
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "1.5"
+          env:
+            - name: ENABLE_HELLO_ERROR
+              value: "false"   
+---
+# create service with the 2 deployment
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-ab-svc
+spec:
+  selector:
+    hello: error-on-off
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
