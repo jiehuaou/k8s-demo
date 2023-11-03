@@ -12,11 +12,11 @@ spec:
       tcp: {}
     loadBalancer:
       simple: RANDOM
-    outlierDetection:
-      consecutive5xxErrors: 10
-      interval: 5s
-      baseEjectionTime: 2m
-      maxEjectionPercent: 100
+    # outlierDetection:
+    #   consecutive5xxErrors: 10
+    #   interval: 5s
+    #   baseEjectionTime: 2m
+    #   maxEjectionPercent: 100
 
 ---
 # See more at https://istio.io/docs/reference/config/networking/virtual-service/
@@ -36,3 +36,4 @@ spec:
       attempts: 3
       perTryTimeout: 2s
       retryOn: 5xx
+---

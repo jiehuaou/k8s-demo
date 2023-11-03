@@ -31,23 +31,35 @@ spec:
     spec:
       containers:
         - name: hello-js-on
-          image: albertou/hello-js:3.8
+          image: albertou/hello-js:3.9
           ports:
             - containerPort: 3000
           resources:
             limits:
-              memory: "64Mi"
+              memory: "128Mi"
               cpu: "1.5"
           env:
             - name: ENABLE_HELLO_ERROR
               value: "true"
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
 ---           
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hello-js-off-deploy
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: hello-js-off
@@ -59,16 +71,28 @@ spec:
     spec:
       containers:
         - name: hello-js-off
-          image: albertou/hello-js:3.8
+          image: albertou/hello-js:3.9
           ports:
             - containerPort: 3000
           resources:
             limits:
-              memory: "64Mi"
+              memory: "128Mi"
               cpu: "1.5"
           env:
             - name: ENABLE_HELLO_ERROR
               value: "false"   
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
 ---
 # create service with the 2 deployment
 apiVersion: v1

@@ -15,7 +15,7 @@ kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -qps 100 -t 5s -c 2
 # build
 
 ``` sh
-export HELLO_VER=3.7
+export HELLO_VER=3.9
 
 docker build -t albertou/hello-js:${HELLO_VER}  .
 # docker tag hello-js:${HELLO_VER} albertou/hello-js:${HELLO_VER}

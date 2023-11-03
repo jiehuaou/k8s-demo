@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Router = require("koa-router");
 const hello = require('./hello');
 const check = require('./check');
+const status = require('./status');
 const app = new Koa();
 const port = 3000;
 
@@ -16,6 +17,7 @@ home.get('/', ctx => {
 app.use(hello.routes());
 app.use(check.routes());
 app.use(home.routes());
+app.use(status.routes());
 
 app.listen(port, () => {
   console.log(`Koa.js server listening at http://localhost:${port}`);
