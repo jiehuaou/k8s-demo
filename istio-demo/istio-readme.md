@@ -142,13 +142,68 @@ trafficPolicy:
 * __Interval__ - The time interval for ejection analysis. For example, the service dependencies are verified every 10 seconds.
 * __MaxEjectionPercent__ - The max percent of hosts that can be ejected from the load balanced pool. For example, setting this field to 100 implies that any unhealthy pods throwing consecutive errors can be ejected and the request will be rerouted to the healthy pods.
 
+# test case-1, consecutive5xxErrors: 3, without retries
+
+```yaml
+---DestinationRule
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 2m
+      maxEjectionPercent: 100
+---VirtualService
+    timeout: 9s
+    # retries:
+    #   attempts: 3
+    #   perTryTimeout: 2s
+    #   retryOn: 5xx      
+```
+
 ```sh
-k apply -f  DestinationRule.yaml
+k apply -f  hello-ab-rule.yaml
 
 istioctl analyze 
 
-export FORTIO_POD=fortio-5d99948b99-99ps6
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
 
-kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a1
 
 ```
+
+result with 3 error, circuit breaker openned on 1 pod
+```text
+Code 200 : 27 (90.0 %)
+Code 500 : 3 (10.0 %)
+```
+
+# test case-2, consecutive5xxErrors: 3, with retries
+
+```yaml
+---DestinationRule
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 2m
+      maxEjectionPercent: 100
+---VirtualService
+    timeout: 9s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx      
+```
+
+```sh
+k apply -f  hello-ab-rule.yaml 
+
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
+
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a1
+
+```
+
+result without error, since retry on error, and circuit breaker openned on 1 pod
+```text
+Code 200 : 30 (100.0 %)
+```
+
