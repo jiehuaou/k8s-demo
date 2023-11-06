@@ -68,23 +68,25 @@ kubectl logs -f hello-js-pod-xxx
 
 ```bash
 # hello service (id:1) will wait 5000 ms, and istio will retry 3 times
-time curl http://127.0.0.1:46021/hello-app/hello/slow/5000/1
+time curl http://127.0.0.1:46021/hello-app/hello/slow/5000/a1
 
 ```
 
 logs was shown, service was retryed 3 times
 ```txt
 Koa.js server listening at http://localhost:3000
-Hello slow 1 ... called at Thu Oct 05 2023 11:55:48 GMT+0000 
-Hello slow 1 ... called at Thu Oct 05 2023 11:55:51 GMT+0000 
-Hello slow 1 ... called at Thu Oct 05 2023 11:55:54 GMT+0000 
+
+Hello 7 slow a1 ... called at Mon Nov 06 2023 02:37:40 GMT+0000 (Coordinated Universal Time)
+Hello 8 slow a1 ... called at Mon Nov 06 2023 02:37:43 GMT+0000 (Coordinated Universal Time)
+Hello 9 slow a1 ... called at Mon Nov 06 2023 02:37:46 GMT+0000 (Coordinated Universal Time)
+Hello 10 slow a1 ... called at Mon Nov 06 2023 02:37:49 GMT+0000 (Coordinated Universal Time)
 
 ```
 
-total time was 9.013s
+total time was 10.019s
 ```txt
-real    0m9.013s
-user    0m0.005s
+real    0m10.019s
+user    0m0.007s
 sys     0m0.000s
 ```
 
