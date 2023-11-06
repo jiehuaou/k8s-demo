@@ -35,7 +35,7 @@ Timeout per try always 3s (including initial call), but the total timeout for al
     * 3s (initial call) + 3s + 2s = 8s
 * The overall waiting time for a successful attempt will not be longer than 8 seconds.
 
-# test case 1 - HTTP/1.1 504 Timeout after 9 seconds and 3 attempts
+# test case 1 - HTTP/1.1 504 Timeout after 10 seconds and 3 attempts
 
 ```yaml
 virtualService:
