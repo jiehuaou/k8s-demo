@@ -143,7 +143,7 @@ k apply -f  DestinationRule.yaml
 
 istioctl analyze 
 
-export FORTIO_POD=fortio-5d99948b99-99ps6
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
 
 kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a
 
