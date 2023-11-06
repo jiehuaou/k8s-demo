@@ -35,7 +35,7 @@ Timeout per try always 3s (including initial call), but the total timeout for al
     * 3s (initial call) + 3s + 2s = 8s
 * The overall waiting time for a successful attempt will not be longer than 8 seconds.
 
-# test case 1 - HTTP/1.1 504 Timeout after 10 seconds and 3 attempts
+# test case 1 - HTTP/1.1 504 Timeout after 9 seconds and 3 attempts
 
 ```yaml
 virtualService:
@@ -68,25 +68,23 @@ kubectl logs -f hello-js-pod-xxx
 
 ```bash
 # hello service (id:1) will wait 5000 ms, and istio will retry 3 times
-time curl http://127.0.0.1:46021/hello-app/hello/slow/5000/a1
+time curl http://127.0.0.1:46021/hello-app/hello/slow/5000/1
 
 ```
 
 logs was shown, service was retryed 3 times
 ```txt
 Koa.js server listening at http://localhost:3000
-
-Hello 7 slow a1 ... called at Mon Nov 06 2023 02:37:40 GMT+0000 (Coordinated Universal Time)
-Hello 8 slow a1 ... called at Mon Nov 06 2023 02:37:43 GMT+0000 (Coordinated Universal Time)
-Hello 9 slow a1 ... called at Mon Nov 06 2023 02:37:46 GMT+0000 (Coordinated Universal Time)
-Hello 10 slow a1 ... called at Mon Nov 06 2023 02:37:49 GMT+0000 (Coordinated Universal Time)
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:48 GMT+0000 
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:51 GMT+0000 
+Hello slow 1 ... called at Thu Oct 05 2023 11:55:54 GMT+0000 
 
 ```
 
-total time was 10.019s
+total time was 9.013s
 ```txt
-real    0m10.019s
-user    0m0.007s
+real    0m9.013s
+user    0m0.005s
 sys     0m0.000s
 ```
 
@@ -138,13 +136,67 @@ trafficPolicy:
 * __Interval__ - The time interval for ejection analysis. For example, the service dependencies are verified every 10 seconds.
 * __MaxEjectionPercent__ - The max percent of hosts that can be ejected from the load balanced pool. For example, setting this field to 100 implies that any unhealthy pods throwing consecutive errors can be ejected and the request will be rerouted to the healthy pods.
 
+# test case-1, consecutive5xxErrors: 3, without retries
+
+```yaml
+---DestinationRule
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 2m
+      maxEjectionPercent: 100
+---VirtualService
+    timeout: 9s
+    # retries:
+    #   attempts: 3
+    #   perTryTimeout: 2s
+    #   retryOn: 5xx      
+```
+
 ```sh
-k apply -f  DestinationRule.yaml
+k apply -f  hello-ab-rule.yaml
 
 istioctl analyze 
 
 export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
 
-kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a1
 
+```
+
+result with 3 error, circuit breaker openned on 1 pod
+```text
+Code 200 : 27 (90.0 %)
+Code 500 : 3 (10.0 %)
+```
+
+# test case-2, consecutive5xxErrors: 3, with retries
+
+```yaml
+---DestinationRule
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 2m
+      maxEjectionPercent: 100
+---VirtualService
+    timeout: 9s
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: 5xx      
+```
+
+```sh
+k apply -f  hello-ab-rule.yaml 
+
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
+
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a1
+
+```
+
+result without error, since retry on error, and circuit breaker openned on 1 pod
+```text
+Code 200 : 30 (100.0 %)
 ```
