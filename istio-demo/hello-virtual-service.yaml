@@ -19,7 +19,7 @@ spec:
         host: hello-js-svc
         port:
           number: 80
-    timeout: 9s
+    timeout: 10s
     retries:
       attempts: 3
       perTryTimeout: 3s
