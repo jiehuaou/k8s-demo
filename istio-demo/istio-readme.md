@@ -4,7 +4,10 @@
 
 **perTryTimeout * retries** should not exceed the global **timeout** . If it does, the retry attempts that fall outside the global timeout will be ignored.
 
+# sample-1
+
 ```yaml
+# sample-1
 virtualService:
     timeout: 10s
     retries:
@@ -19,7 +22,10 @@ Timeout per try always 3s (including initial call), but the total timeout for al
     * 3s (initial call) + 3s + 3s + 1s = 10s
 * The overall waiting time for a successful attempt will not be longer than 10 seconds.
 
+# sample-2
+
 ```yaml
+# sample-2
 virtualService:
     timeout: 8s
     retries:
@@ -39,7 +45,7 @@ Timeout per try always 3s (including initial call), but the total timeout for al
 
 ```yaml
 virtualService:
-    timeout: 10s
+    timeout: 9s
     retries:
       attempts: 3
       perTryTimeout: 3s
