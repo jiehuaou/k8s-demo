@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: hello-js-on
-          image: albertou/hello-js:3.9
+          image: albertou/hello-js:3.9.1
           ports:
             - containerPort: 3000
           resources:
@@ -59,7 +59,7 @@ kind: Deployment
 metadata:
   name: hello-js-off-deploy
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app: hello-js-off
@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
         - name: hello-js-off
-          image: albertou/hello-js:3.9
+          image: albertou/hello-js:3.9.1
           ports:
             - containerPort: 3000
           resources:

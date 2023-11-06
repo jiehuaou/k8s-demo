@@ -1,7 +1,7 @@
 # deploy with ENABLE_HELLO_ERROR on/off
 
 ``` sh
-export HELLO_VER=3.8
+export HELLO_VER=3.9
 
 k apply -f deploy-ab.yaml
 
@@ -27,9 +27,9 @@ curl -v http://127.0.0.1:36351/api/hello/error/500/a2
 # test hello-ab-svc service with fortio
 
 ```sh
-export FORTIO_POD=fortio-6cfb66fd9-fsx5n
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o jsonpath='{.items[0].metadata.name}')
 
-kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 30  http://hello-ab-svc:3000/api/hello/error/500/a
+kubectl exec ${FORTIO_POD} -c fortio -- /usr/bin/fortio load -loglevel Warning -n 3  http://hello-ab-svc:3000/api/hello/error/500/a
 
 ```
 

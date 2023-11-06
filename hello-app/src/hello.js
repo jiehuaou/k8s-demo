@@ -1,11 +1,17 @@
 const Router = require("koa-router");
 const router = new Router();
 
-let counter = 0;
+const POD_NAME = process.env.HOSTNAME || 'unknown';
+let _counter = 1;
 
 const getCounter = () => {
-    return counter++;
+    return _counter++;
 }
+
+const getLabel = () => {
+    return `${getCounter()}/${POD_NAME}`;
+}
+
 const stringToBoolean = (stringValue) => {
     switch(stringValue?.toLowerCase()?.trim()){
         case "true": 
@@ -25,10 +31,12 @@ const stringToBoolean = (stringValue) => {
     }
 }
 
-console.log(`ENABLE_HELLO_ERROR - config ${process.env.ENABLE_HELLO_ERROR}`);
+console.log(`HOSTNAME - config is ${process.env.HOSTNAME}`);
+
+console.log(`ENABLE_HELLO_ERROR - config is ${process.env.ENABLE_HELLO_ERROR}`);
 
 const enabled = stringToBoolean(process.env.ENABLE_HELLO_ERROR);
-console.log(`ENABLE_HELLO_ERROR - eval ${enabled}`);
+console.log(`ENABLE_HELLO_ERROR - eval => ${enabled}`);
 
 router.get("/api/hello", async (ctx) => {
     console.log("Hello 1 ... called " + new Date());
@@ -40,12 +48,13 @@ router.get("/api/hello", async (ctx) => {
 router.get("/api/hello/slow/:time/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
-    console.log(`Hello ${getCounter()} slow ${id} ... called at ${timestamp} ` );
+    const label = getLabel();
+    console.log(`Hello ${label} slow-ID ${id} ... at ${timestamp} ` );
     const time = parseInt(ctx.params.time) | 10;  // milliseconds
     await new Promise((resolve) => {
         setTimeout(() => {
-            ctx.body = `(${id}) Hello World ${time} at ${timestamp} \n`;
-            console.log(`Hello slow ${id}  ... done`);
+            ctx.body = ` ${label} (${id}) Hello World ${time} at ${timestamp} \n`;
+            console.log(`Hello ${label} slow-ID ${id}  ... done`);
             resolve();
         }, time);
     })
@@ -54,21 +63,22 @@ router.get("/api/hello/slow/:time/:id", async (ctx) => {
 router.get("/api/hello/error/:code/:id", async (ctx) => {
     const timestamp = new Date();
     const id = ctx.params.id;
-    console.log(`Hello ${getCounter()} error ${id} ... called at ${timestamp} ` );
+    const label = getLabel();
+    console.log(`Hello ${label} error-ID ${id} ... at ${timestamp} ` );
     const code = parseInt(ctx.params.code) | 500;  // error code 5xx, 4xx
    
     if(!enabled){
         ctx.status = 200;
-        ctx.body = `(${id}) something good ${code} at ${timestamp} \n`;
-        console.log(`Hello non-error ${id}  ... done`);
+        ctx.body = `${label}(${id}) good-code ${code} at ${timestamp} \n`;
+        console.log(`${label}(${id}) good ${code}  ... done`);
         return;
     }
 
     await new Promise((resolve) => {
         setTimeout(() => {
             ctx.status = code;
-            ctx.body = `(${id}) something wrong ${code} at ${timestamp} \n`;
-            console.log(`Hello error ${id}  ... done`);
+            ctx.body = `${label}(${id}) wrong-code ${code} at ${timestamp} \n`;
+            console.log(`${label}(${id}) wrong ${code}  ... done`);
             resolve();
         }, 100);
     })
